@@ -10,20 +10,20 @@ const handleValidation = (req, res, next) => {
 
 const ideaValidationRules = [
   body('userId').notEmpty().withMessage('userId is required'),
-  body('title').isString().notEmpty().withMessage('title is required'),
-  body('description').isString().notEmpty().withMessage('description is required'),
-  body('category').isString().notEmpty().withMessage('category is required'),
+  body('title').notEmpty().withMessage('title is required'),
+  body('description').notEmpty().withMessage('description is required'),
+  body('category').notEmpty().withMessage('category is required'),
   body('tags').isArray().withMessage('tags must be an array'),
-  body('status').isIn(['draft', 'refined', 'abandoned']).withMessage('status must be draft, refined, or abandoned'),
-  body('rating').isInt({ min: 1, max: 5 }).withMessage('rating must be between 1 and 5')
+  body('status').notEmpty().withMessage('status is required'),
+  body('rating').isNumeric().withMessage('rating must be a number')
 ];
 
 const sessionValidationRules = [
   body('userId').notEmpty().withMessage('userId is required'),
-  body('sessionName').isString().notEmpty().withMessage('sessionName is required'),
-  body('prompt').isString().notEmpty().withMessage('prompt is required'),
+  body('sessionName').notEmpty().withMessage('sessionName is required'),
+  body('prompt').notEmpty().withMessage('prompt is required'),
   body('ideas').isArray().withMessage('ideas must be an array'),
-  body('notes').isString().withMessage('notes must be a string')
+  body('notes').optional().isString().withMessage('notes must be a string')
 ];
 
 module.exports = {

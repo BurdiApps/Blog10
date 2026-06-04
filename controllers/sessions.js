@@ -3,7 +3,7 @@ const ObjectId = require('mongodb').ObjectId;
 
 const getAll = async (req, res) => {
   try {
-    const result = await mongodb.getDb().db('Blog10').collection('sessions').find();
+    const result = await mongodb.getDb().db().collection('sessions').find();
     const sessions = await result.toArray();
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json(sessions);
@@ -14,13 +14,16 @@ const getAll = async (req, res) => {
 
 const getSingle = async (req, res) => {
   try {
-    if (!ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ message: 'Invalid id format' });
-    }
     const sessionId = new ObjectId(req.params.id);
-    const result = await mongodb.getDb().db('Blog10').collection('sessions').findOne({ _id: sessionId });
-    if (!result) return res.status(404).json({ message: 'Session not found' });
-    res.status(200).json(result);
+    const result = await mongodb.getDb().db().collection('sessions').find({ _id: sessionId });
+    const sessions = await result.toArray();
+
+    if (!sessions.length) {
+      return res.status(404).json({ message: 'Session not found' });
+    }
+
+    res.setHeader('Content-Type', 'application/json');
+    res.status(200).json(sessions[0]);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -33,14 +36,18 @@ const createSession = async (req, res) => {
       sessionName: req.body.sessionName,
       prompt: req.body.prompt,
       ideas: req.body.ideas,
-      notes: req.body.notes,
-      createdAt: new Date()
+      notes: req.body.notes
     };
-    const response = await mongodb.getDb().db('Blog10').collection('sessions').insertOne(session);
+
+    const response = await mongodb.getDb().db().collection('sessions').insertOne(session);
+
     if (response.acknowledged) {
-      res.status(201).json(response);
+      res.status(201).json({
+        message: 'Session created successfully',
+        id: response.insertedId
+      });
     } else {
-      res.status(500).json({ message: 'Error creating session' });
+      res.status(500).json({ message: 'Some error occurred while creating the session.' });
     }
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -49,9 +56,6 @@ const createSession = async (req, res) => {
 
 const updateSession = async (req, res) => {
   try {
-    if (!ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ message: 'Invalid id format' });
-    }
     const sessionId = new ObjectId(req.params.id);
     const session = {
       userId: req.body.userId,
@@ -60,26 +64,13 @@ const updateSession = async (req, res) => {
       ideas: req.body.ideas,
       notes: req.body.notes
     };
-    const response = await mongodb.getDb().db('Blog10').collection('sessions').replaceOne({ _id: sessionId }, session);
+
+    const response = await mongodb.getDb().db().collection('sessions').replaceOne({ _id: sessionId }, session);
+
     if (response.modifiedCount > 0) {
       res.status(204).send();
-    } else {
-      res.status(404).json({ message: 'Session not found or no changes made' });
-    }
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-const deleteSession = async (req, res) => {
-  try {
-    if (!ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ message: 'Invalid id format' });
-    }
-    const sessionId = new ObjectId(req.params.id);
-    const response = await mongodb.getDb().db('Blog10').collection('sessions').deleteOne({ _id: sessionId });
-    if (response.deletedCount > 0) {
-      res.status(200).send();
+    } else if (response.matchedCount > 0) {
+      res.status(204).send();
     } else {
       res.status(404).json({ message: 'Session not found' });
     }
@@ -88,4 +79,25 @@ const deleteSession = async (req, res) => {
   }
 };
 
-module.exports = { getAll, getSingle, createSession, updateSession, deleteSession };
+const deleteSession = async (req, res) => {
+  try {
+    const sessionId = new ObjectId(req.params.id);
+    const response = await mongodb.getDb().db().collection('sessions').deleteOne({ _id: sessionId });
+
+    if (response.deletedCount > 0) {
+      res.status(200).json({ message: 'Session deleted successfully' });
+    } else {
+      res.status(404).json({ message: 'Session not found' });
+    }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+module.exports = {
+  getAll,
+  getSingle,
+  createSession,
+  updateSession,
+  deleteSession
+};

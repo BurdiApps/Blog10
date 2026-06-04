@@ -1,7 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const ideasController = require('../controllers/ideas');
-const { ideaValidationRules, handleValidation } = require('../middleware/validation');
+const {
+  ideaValidationRules,
+  handleValidation
+} = require('../middleware/validation');
 
 router.get('/', ideasController.getAll);
 router.get('/:id', ideasController.getSingle);

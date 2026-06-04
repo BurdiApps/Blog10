@@ -1,7 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const sessionsController = require('../controllers/sessions');
-const { sessionValidationRules, handleValidation } = require('../middleware/validation');
+const {
+  sessionValidationRules,
+  handleValidation
+} = require('../middleware/validation');
 
 router.get('/', sessionsController.getAll);
 router.get('/:id', sessionsController.getSingle);
