@@ -3,10 +3,10 @@ const swaggerAutogen = require('swagger-autogen')();
 const doc = {
   info: {
     title: 'Blog10 API',
-    description: 'Blog10- Daily Idea & Brainstorm Journal API'
+    description: 'Blog10 - Daily Idea & Brainstorm Journal API'
   },
-  host: 'localhost:3000',
-  schemes: ['http', 'https']
+  host: 'blog10-epia.onrender.com',
+  schemes: ['https', 'http']
 };
 
 const outputFile = './swagger.json';
