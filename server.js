@@ -10,6 +10,8 @@ const passport = require('./config/passport');
 const app = express();
 const port = process.env.PORT || 3000;
 
+app.set('trust proxy', 1);
+
 app
   .use(express.json())
   .use((req, res, next) => {
@@ -19,6 +21,7 @@ app
       'Origin, X-Requested-With, Content-Type, Accept, Z-Key'
     );
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
     next();
   })
   .use(session({
@@ -26,7 +29,9 @@ app
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === 'production',
+      secure: false,
+      httpOnly: true,
+      sameSite: 'lax',
       maxAge: 24 * 60 * 60 * 1000
     }
   }))

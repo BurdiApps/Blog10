@@ -4,16 +4,23 @@ const passport = require('passport');
 
 // @route   GET /auth/google
 // @desc    Authenticate with Google
-router.get('/google',
+router.get(
+  '/google',
   passport.authenticate('google', { scope: ['profile', 'email'] })
 );
 
 // @route   GET /auth/google/callback
 // @desc    Google auth callback
-router.get('/google/callback',
+router.get(
+  '/google/callback',
   passport.authenticate('google', { failureRedirect: '/' }),
-  (req, res) => {
-    res.redirect('/auth/profile');
+  (req, res, next) => {
+    req.session.save((err) => {
+      if (err) {
+        return next(err);
+      }
+      res.redirect('/auth/profile');
+    });
   }
 );
 
@@ -23,6 +30,7 @@ router.get('/profile', (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ message: 'Not authenticated. Please login at /auth/google' });
   }
+
   res.status(200).json({
     message: 'You are logged in!',
     user: {
@@ -42,7 +50,10 @@ router.get('/logout', (req, res) => {
     if (err) {
       return res.status(500).json({ message: 'Error logging out' });
     }
-    res.status(200).json({ message: 'Logged out successfully' });
+
+    req.session.destroy(() => {
+      res.status(200).json({ message: 'Logged out successfully' });
+    });
   });
 });
 
