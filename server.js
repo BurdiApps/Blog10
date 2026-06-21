@@ -6,6 +6,7 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./swagger.json');
 const session = require('express-session');
 const passport = require('./config/passport');
+const cors = require('cors');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -13,17 +14,13 @@ const port = process.env.PORT || 3000;
 app.set('trust proxy', 1);
 
 app
+  .use(cors({
+    origin: ['http://localhost:5173', 'https://blog10-epia.onrender.com'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Z-Key']
+  }))
   .use(express.json())
-  .use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader(
-      'Access-Control-Allow-Headers',
-      'Origin, X-Requested-With, Content-Type, Accept, Z-Key'
-    );
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    next();
-  })
   .use(session({
     secret: process.env.SESSION_SECRET || 'blog10secret',
     resave: false,
